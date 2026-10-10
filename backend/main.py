@@ -18,6 +18,7 @@ import jwt
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
@@ -25,6 +26,16 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 app = FastAPI(title='TODO List API')
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:63342",
+        "http://127.0.0.1:63342",
+    ],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 password_hash = PasswordHash.recommended()
 security = HTTPBearer()
 
