@@ -1,4 +1,3 @@
-
 const API_URL = "https://todo-list-api-qbo7.onrender.com";
 
 const usuario = document.getElementById("usuario");
@@ -13,8 +12,15 @@ const areaTarefas = document.getElementById("area-tarefas");
 
 const titulo = document.getElementById("titulo");
 const descricao = document.getElementById("descricao");
+const prioridade = document.getElementById("prioridade");
+const prazo = document.getElementById("prazo");
 const adicionar = document.getElementById("adicionar");
+const cancelarEdicaoBotao = document.getElementById("cancelar-edicao");
 const lista = document.getElementById("lista");
+
+const filtroStatus = document.getElementById("filtro-status");
+const filtroPrioridade = document.getElementById("filtro-prioridade");
+const limparFiltros = document.getElementById("limpar-filtros");
 
 function mostrarMensagem(texto) {
     mensagem.textContent = texto;
@@ -99,32 +105,80 @@ cadastrar.addEventListener("click", async function () {
 
 function cancelarEdicao() {
     delete titulo.dataset.taskId;
+
     titulo.value = "";
     descricao.value = "";
+    prioridade.value = "media";
+    prazo.value = "";
+
     adicionar.textContent = "Adicionar tarefa";
+    cancelarEdicaoBotao.hidden = true;
 }
 
 function prepararEdicao(tarefa) {
     titulo.value = tarefa.title;
-    descricao.value = tarefa.description;
+    descricao.value = tarefa.description || "";
+    prioridade.value = tarefa.priority || "media";
+    prazo.value = tarefa.due_date
+        ? String(tarefa.due_date).slice(0, 10)
+        : "";
+
     titulo.dataset.taskId = String(tarefa.id);
+
     adicionar.textContent = "Salvar edição";
+    cancelarEdicaoBotao.hidden = false;
+
     titulo.focus();
 }
 
+cancelarEdicaoBotao.addEventListener("click", function () {
+    cancelarEdicao();
+    mostrarMensagem("Edição cancelada.");
+});
+
 async function carregarTarefas() {
     try {
-        const resultado = await requisicao("/tasks", {
+        const parametros = new URLSearchParams();
+
+        if (filtroPrioridade.value !== "todas") {
+            parametros.set("priority", filtroPrioridade.value);
+        }
+
+        if (filtroStatus.value === "pendentes") {
+            parametros.set("completed", "false");
+        } else if (filtroStatus.value === "concluidas") {
+            parametros.set("completed", "true");
+        }
+
+        const query = parametros.toString();
+        const url = query ? `/tasks?${query}` : "/tasks";
+
+        const resultado = await requisicao(url, {
             headers: obterCabecalhos()
         });
 
         lista.replaceChildren();
 
+        if (resultado.tasks.length === 0) {
+            const itemVazio = document.createElement("li");
+            itemVazio.textContent = "Nenhuma tarefa encontrada.";
+            lista.appendChild(itemVazio);
+            return;
+        }
+
         for (const tarefa of resultado.tasks) {
             const item = document.createElement("li");
 
             const texto = document.createElement("span");
-            texto.textContent = `${tarefa.title} - ${tarefa.description}`;
+
+            const dataPrazo = tarefa.due_date
+                ? String(tarefa.due_date).slice(0, 10)
+                : "Sem prazo";
+
+            texto.textContent =
+                `${tarefa.title} - ${tarefa.description || ""} | ` +
+                `Prioridade: ${tarefa.priority || "media"} | ` +
+                `Prazo: ${dataPrazo}`;
 
             if (tarefa.completed) {
                 texto.style.textDecoration = "line-through";
@@ -153,7 +207,9 @@ async function carregarTarefas() {
                     mostrarMensagem("");
                     await carregarTarefas();
                 } catch (erro) {
-                    mostrarMensagem(`Erro ao atualizar tarefa: ${erro.message}`);
+                    mostrarMensagem(
+                        `Erro ao atualizar tarefa: ${erro.message}`
+                    );
                 }
             });
 
@@ -161,11 +217,7 @@ async function carregarTarefas() {
             excluir.textContent = "Excluir";
 
             excluir.addEventListener("click", async function () {
-                const confirmar = confirm(
-                    `Deseja excluir a tarefa "${tarefa.title}"?`
-                );
-
-                if (!confirmar) {
+                if (!confirm(`Deseja excluir a tarefa "${tarefa.title}"?`)) {
                     return;
                 }
 
@@ -182,7 +234,9 @@ async function carregarTarefas() {
                     mostrarMensagem("Tarefa excluída com sucesso.");
                     await carregarTarefas();
                 } catch (erro) {
-                    mostrarMensagem(`Erro ao excluir tarefa: ${erro.message}`);
+                    mostrarMensagem(
+                        `Erro ao excluir tarefa: ${erro.message}`
+                    );
                 }
             });
 
@@ -219,15 +273,19 @@ adicionar.addEventListener("click", async function () {
         return;
     }
 
+    const dadosTarefa = {
+        title: tituloTarefa,
+        description: descricaoTarefa,
+        priority: prioridade.value,
+        due_date: prazo.value || null
+    };
+
     try {
         if (taskId) {
             await requisicao(`/tasks/${taskId}`, {
                 method: "PATCH",
                 headers: obterCabecalhos(true),
-                body: JSON.stringify({
-                    title: tituloTarefa,
-                    description: descricaoTarefa
-                })
+                body: JSON.stringify(dadosTarefa)
             });
 
             mostrarMensagem("Tarefa editada com sucesso.");
@@ -236,10 +294,8 @@ adicionar.addEventListener("click", async function () {
                 method: "POST",
                 headers: obterCabecalhos(true),
                 body: JSON.stringify({
-                    title: tituloTarefa,
-                    description: descricaoTarefa,
-                    completed: false,
-                    priority: "media"
+                    ...dadosTarefa,
+                    completed: false
                 })
             });
 
@@ -253,8 +309,18 @@ adicionar.addEventListener("click", async function () {
     }
 });
 
+filtroStatus.addEventListener("change", carregarTarefas);
+filtroPrioridade.addEventListener("change", carregarTarefas);
+
+limparFiltros.addEventListener("click", function () {
+    filtroStatus.value = "todas";
+    filtroPrioridade.value = "todas";
+    carregarTarefas();
+});
+
 function encerrarSessao() {
     localStorage.removeItem("access_token");
+
     cancelarEdicao();
 
     areaAutenticacao.hidden = false;

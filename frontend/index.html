@@ -6,31 +6,96 @@
     <title>TODO List</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
     <h1>TODO List</h1>
-
     <p>Suas tarefas organizadas.</p>
 
-    <label for="titulo">Título da tarefa</label>
-    <br>
-    <input id="titulo" type="text">
+    <section id="area-autenticacao">
+        <h2>Entrar</h2>
 
-    <br><br>
+        <label for="usuario">Usuário</label>
+        <br>
+        <input id="usuario" type="text" autocomplete="username">
 
-    <label for="descricao">Descrição</label>
-    <br>
-    <textarea id="descricao"></textarea>
+        <br><br>
 
-    <br><br>
+        <label for="senha">Senha</label>
+        <br>
+        <input id="senha" type="password" autocomplete="current-password">
 
-    <button id="adicionar">Adicionar Tarefa</button>
+        <br><br>
 
-    <ul id="lista">
-    </ul>
+        <button id="entrar">Entrar</button>
+        <button id="cadastrar">Criar conta</button>
+
+        <p id="mensagem"></p>
+    </section>
+
+    <section id="area-tarefas" hidden>
+        <h2>Minhas tarefas</h2>
+
+        <label for="titulo">Título da tarefa</label>
+        <br>
+        <input id="titulo" type="text">
+
+        <br><br>
+
+        <label for="descricao">Descrição</label>
+        <br>
+        <textarea id="descricao"></textarea>
+
+        <br><br>
+
+        <label for="prioridade">Prioridade</label>
+        <br>
+        <select id="prioridade">
+            <option value="baixa">Baixa</option>
+            <option value="media" selected>Média</option>
+            <option value="alta">Alta</option>
+        </select>
+
+        <br><br>
+
+        <label for="prazo">Prazo</label>
+        <br>
+        <input id="prazo" type="date">
+
+        <br><br>
+
+        <button id="adicionar">Adicionar tarefa</button>
+        <button id="cancelar-edicao" type="button" hidden>Cancelar edição</button>
+        <button id="sair">Sair</button>
+
+        <hr>
+
+        <h3>Filtrar tarefas</h3>
+
+        <label for="filtro-status">Status</label>
+        <br>
+        <select id="filtro-status">
+            <option value="todas">Todas</option>
+            <option value="pendentes">Pendentes</option>
+            <option value="concluidas">Concluídas</option>
+        </select>
+
+        <br><br>
+
+        <label for="filtro-prioridade">Prioridade</label>
+        <br>
+        <select id="filtro-prioridade">
+            <option value="todas">Todas</option>
+            <option value="baixa">Baixa</option>
+            <option value="media">Média</option>
+            <option value="alta">Alta</option>
+        </select>
+
+        <br><br>
+
+        <button id="limpar-filtros" type="button">Limpar filtros</button>
+
+        <ul id="lista"></ul>
+    </section>
 
     <script src="script.js"></script>
-
 </body>
 </html>
