@@ -1,44 +1,59 @@
 # TODO List API
 
-API REST para gerenciamento de tarefas, desenvolvida com Python e FastAPI.
+API REST para gerenciamento de tarefas, desenvolvida com Python e FastAPI, com autenticação JWT, PostgreSQL e interface web em HTML, CSS e JavaScript.
 
-O projeto implementa autenticação de usuários com JWT, persistência de dados em PostgreSQL e operações CRUD para gerenciamento de tarefas.
+**Desenvolvimento:** backend desenvolvido por mim; frontend construído com auxílio de inteligência artificial (IA).
 
-## Tecnologias
+## Demonstração
 
-* Python
-* FastAPI
-* SQLAlchemy
-* PostgreSQL
-* Pydantic
-* JWT
-* Argon2
-* HTML
-* CSS
-* JavaScript
-* Git
-* GitHub
+- **API:** https://todo-list-api-qbo7.onrender.com/
+- **Swagger:** https://todo-list-api-qbo7.onrender.com/docs
 
 ## Funcionalidades
 
-* Cadastro de usuários
-* Hash seguro de senhas com Argon2
-* Login com geração de JWT
-* Autenticação e proteção das rotas
-* Criação de tarefas
-* Listagem de tarefas
-* Busca de tarefa por ID
-* Atualização completa de tarefas
-* Atualização parcial de tarefas
-* Exclusão de tarefas
-* Definição de prioridade
-* Definição de prazo
-* Filtro por prioridade
-* Filtro por status de conclusão
-* Listagem de tarefas atrasadas
-* Associação das tarefas ao usuário autenticado
+- Cadastro de usuários e autenticação JWT.
+- Hash de senhas com Argon2.
+- Criação, listagem, consulta, atualização e exclusão de tarefas.
+- Atualização completa e parcial de tarefas.
+- Definição de prioridade: baixa, média e alta.
+- Definição de prazos.
+- Marcação de tarefas como concluídas ou pendentes.
+- Filtro por prioridade e status de conclusão.
+- Associação de tarefas ao usuário autenticado.
+- Persistência de dados em PostgreSQL.
 
-## Estrutura
+## Tecnologias
+
+| Tecnologia | Utilização |
+|---|---|
+| Python | Backend |
+| FastAPI | API REST |
+| PostgreSQL | Banco de dados |
+| SQLAlchemy | ORM |
+| Pydantic | Validação de dados |
+| JWT | Autenticação |
+| Argon2 | Hash de senhas |
+| HTML5 | Estrutura do frontend |
+| CSS3 | Estilização |
+| JavaScript | Interatividade e integração com a API |
+| Git e GitHub | Versionamento e hospedagem do código |
+| Render | Deploy da API |
+
+## Arquitetura
+
+```mermaid
+flowchart TD
+    A[Usuário] --> B[Frontend HTML CSS JavaScript]
+    B --> C[API REST FastAPI]
+    C --> D[Autenticação JWT]
+    C --> E[Validação Pydantic]
+    D --> F[Operações da aplicação]
+    E --> F
+    F --> G[SQLAlchemy]
+    G --> H[(PostgreSQL)]
+```
+
+## Estrutura do projeto
 
 ```text
 TODO-List-API/
@@ -52,38 +67,46 @@ TODO-List-API/
 │   ├── index.html
 │   ├── script.js
 │   └── style.css
-├── .env
 ├── .gitignore
-├── README.md
-└── requirements.txt
+├── requirements.txt
+└── README.md
 ```
 
-## API
+## Endpoints
 
 ### Usuários
 
-| Método | Endpoint | Descrição                |
-| ------ | -------- | ------------------------ |
-| POST   | `/users` | Cadastra um usuário      |
-| POST   | `/login` | Realiza login e gera JWT |
+| Método | Endpoint | Descrição |
+|---|---|---|
+| POST | `/users` | Cadastro de usuário |
+| POST | `/login` | Login e geração de JWT |
 
 ### Tarefas
 
-| Método | Endpoint           | Descrição                            |
-| ------ | ------------------ | ------------------------------------ |
-| GET    | `/tasks`           | Lista tarefas do usuário autenticado |
-| GET    | `/tasks/{task_id}` | Busca uma tarefa                     |
-| GET    | `/tasks/overdue`   | Lista tarefas atrasadas              |
-| POST   | `/tasks`           | Cria uma tarefa                      |
-| PUT    | `/tasks/{task_id}` | Substitui uma tarefa                 |
-| PATCH  | `/tasks/{task_id}` | Atualiza parcialmente uma tarefa     |
-| DELETE | `/tasks/{task_id}` | Remove uma tarefa                    |
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/tasks` | Lista tarefas |
+| GET | `/tasks/{task_id}` | Consulta tarefa por ID |
+| POST | `/tasks` | Cria tarefa |
+| PUT | `/tasks/{task_id}` | Atualiza tarefa |
+| PATCH | `/tasks/{task_id}` | Atualiza parcialmente tarefa |
+| DELETE | `/tasks/{task_id}` | Exclui tarefa |
 
-As rotas de tarefas exigem autenticação através de um token JWT.
+Os endpoints de tarefas exigem autenticação JWT.
+
+### Filtros
+
+O endpoint `GET /tasks` aceita os parâmetros `priority` e `completed`.
+
+```text
+GET /tasks?priority=alta
+GET /tasks?completed=false
+GET /tasks?priority=media&completed=true
+```
 
 ## Autenticação
 
-Após realizar o login em `/login`, a API retorna um token:
+O endpoint `POST /login` retorna um token de acesso:
 
 ```json
 {
@@ -92,69 +115,79 @@ Após realizar o login em `/login`, a API retorna um token:
 }
 ```
 
-O token deve ser enviado nas requisições protegidas através do header:
+O token deve ser enviado no cabeçalho das requisições protegidas:
 
 ```text
 Authorization: Bearer seu_token
 ```
 
-As tarefas são associadas automaticamente ao usuário identificado pelo JWT.
-
 ## Banco de dados
 
-O projeto utiliza PostgreSQL como banco de dados e SQLAlchemy como ORM.
+A conexão com o PostgreSQL é configurada pela variável de ambiente `DATABASE_URL`.
 
-A URL de conexão é configurada através da variável de ambiente:
+Exemplo:
 
 ```text
-DATABASE_URL
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/todo_list
 ```
 
-As credenciais e informações sensíveis não devem ser armazenadas no repositório.
+## Execução local
 
-## Como executar
-
-Clone o repositório:
+### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/PedroSilva370/TODO-List-API.git
 cd TODO-List-API
 ```
 
-Crie e ative um ambiente virtual:
+### 2. Criar o ambiente virtual
 
 ```bash
 python -m venv .venv
-```
-
-No Windows:
-
-```bash
 .venv\Scripts\activate
 ```
 
-Instale as dependências:
+### 3. Instalar as dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Configure as variáveis de ambiente no arquivo `.env`.
+### 4. Configurar o banco de dados
 
-Execute a API:
+Configure a variável `DATABASE_URL` no arquivo `.env`.
+
+### 5. Iniciar a API
 
 ```bash
 fastapi dev backend/main.py
 ```
 
-A documentação interativa da API estará disponível no Swagger:
+Documentação local: http://127.0.0.1:8000/docs
 
-```text
-/docs
+### 6. Configurar o frontend
+
+No arquivo `frontend/script.js`, altere `API_URL` para o endereço da API local:
+
+```javascript
+const API_URL = "http://127.0.0.1:8000";
 ```
 
-## Status
+## Deploy
 
-Em desenvolvimento.
+A API está hospedada no Render.
 
-O backend possui CRUD completo, persistência em PostgreSQL e autenticação JWT.
+- **API:** https://todo-list-api-qbo7.onrender.com/
+- **Swagger:** https://todo-list-api-qbo7.onrender.com/docs
+
+## Autor
+
+**Pedro Gaudencio**
+
+- GitHub: [@PedroSilva370](https://github.com/PedroSilva370)
+- Repositório: [TODO-List-API](https://github.com/PedroSilva370/TODO-List-API)
+
+## Créditos
+
+- **Backend:** desenvolvido por mim.
+- **Frontend:** construído com auxílio de inteligência artificial (IA).
